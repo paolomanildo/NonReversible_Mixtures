@@ -1,5 +1,6 @@
-library(nrMCmix)
-
+#load the package
+tryCatch(require(nrMCmix), error = function(x) message'Cannot found package "nrMCmix", try load it by Rcpp::sourceCpp("nrMCmix.cpp")')
+  
 library(doParallel)
 library(foreach)
 
