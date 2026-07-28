@@ -10,6 +10,6 @@ figure3 <- cluster_sizes(n = 1000, d = 18, N = 100, B = 500,
                          sample_from_model = TRUE)
 
 
-histo(figure3$MG); curve(dbeta(x,4,4), add = TRUE, col = "gray", gg = TRUE)
-histo(figure3$NR,"Non-reversible");  curve(dbeta(x,4,4), add = TRUE, col = "gray", gg = TRUE)
+histo(figure3$MG); curve(dbeta(x,4,4), add = TRUE, col = "gray")
+histo(figure3$NR,"Non-reversible");  curve(dbeta(x,4,4), add = TRUE, col = "gray")
 violin(figure3$MG[,1,],figure3$NR[,1,], gg = TRUE)
