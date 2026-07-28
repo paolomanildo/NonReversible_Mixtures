@@ -114,4 +114,4 @@ long_run <- fit(save_parameters = TRUE, draws = TRUE,
                 thin = 1000, SAM = TRUE, compute_similarity = TRUE)
 
 #save the results
-save(long_run, file = "long_run.RData")
+save(long_run,fit, file = "long_run.RData")
