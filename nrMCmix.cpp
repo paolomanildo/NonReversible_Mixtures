@@ -14432,3 +14432,22 @@ arma::vec priorK(const double& alpha = 1.0,
   // return the last row of the matrix
   return arma::exp(log_P.row(n-1).t());
 }
+
+/*** R
+
+get_labels_draws <- function(sampler, chain_id = 1){
+  
+  #get the allocation vectors
+  filename <- paste0(sampler$filename,"/confs",chain_id,".csv")
+  confs <- as.matrix(read.csv(filename, header = FALSE))
+  colnames(confs) <- rownames(confs) <- NULL
+  
+  #delete the file
+  file.remove(filename)
+  
+  #return the labels
+  confs
+  
+}
+
+*/
