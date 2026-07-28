@@ -5,7 +5,8 @@ spaghetti <- function(X,
                       title = "",
                       gg = FALSE,
                       ylim = c(0.5,1),
-                      col = adjustcolor("darkgray",0.3)){
+                      col = adjustcolor("darkgray",0.3),
+                      which_show = NULL){
   
   #ggplots?
   if(gg){
@@ -16,9 +17,16 @@ spaghetti <- function(X,
                      sim_iter = rep(seq_len(NCOL(X)),each = NROW(X)))
     
     #create also the data frame with the mean line
-    df_mean <- data.frame(prop = apply(X,1,mean),
-                          chain_iter = seq_len(NROW(X)),
-                          sim_iter = 1)
+    if(is.null(which_show)){
+      df_mean <- data.frame(prop = apply(X,1,mean),
+                            chain_iter = seq_len(NROW(X)),
+                            sim_iter = 1)
+    }else{
+      df_mean <- data.frame(prop = X[,which_show],
+                            chain_iter = seq_len(NROW(X)),
+                            sim_iter = 1)
+    }
+    
     
     ggplot2::ggplot(df, ggplot2::aes(x = chain_iter,
                                      y = prop,
@@ -50,7 +58,11 @@ spaghetti <- function(X,
       lines(seq_len(N),X[,b], col = col)
     }
     #add the mean line
-    lines(seq_len(N),apply(X,1,mean),col = "black")
+    if(is.null(which_show)){
+      lines(seq_len(N),apply(X,1,mean),col = "black")
+    }else{
+      lines(seq_len(N),X[,which_show],col = "black")
+    }
   }
   
 }
