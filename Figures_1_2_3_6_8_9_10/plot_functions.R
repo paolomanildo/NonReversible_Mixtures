@@ -176,18 +176,62 @@ violin <- function(X,
 }
 
 #scatter plot
-cloud_plot <- function(X, which = 1:2){
+cloud_plot <- function(X, which = 1:2, gg = FALSE){
   
-  #take the tail
-  plot(t(X[NROW(X),which,]), xlim = c(0,1), ylim = c(0,1),
-       xlab = "", ylab = "", pch = 16, cex = .5)
+  if(gg){
+    
+    #take the tail
+    df <- data.frame(
+      x = X[NROW(X), which[1], ],
+      y = X[NROW(X), which[2], ]
+    )
+    
+    ggplot2::ggplot(df, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(size = 0.5) +
+      ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+      ggplot2::labs(x = NULL, y = NULL) +
+      ggplot2::theme_classic()
+    
+  }else{
+    
+    #take the tail
+    plot(t(X[NROW(X),which,]), xlim = c(0,1), ylim = c(0,1),
+         xlab = "", ylab = "", pch = 16, cex = .5)
+    
+  }
   
 }
 
 #histogram
 histo <- function(X, title = "Marginal"){
   
-  hist(X[NROW(X),1,], bty = "n", col = "black", prob = TRUE,
-       xlab = "", ylab = "", main = title )
-
+  if(gg){
+    
+    df <- data.frame(
+      x = X[NROW(X), 1, ]
+    )
+    
+    ggplot2::ggplot(df, ggplot2::aes(x = x)) +
+      ggplot2::geom_histogram(
+        bins = 30,              
+        fill = "black",
+        color = "black",
+        aes(y = ggplot2::after_stat(density))
+      ) +
+      ggplot2::labs(
+        x = NULL,
+        y = NULL,
+        title = title
+      ) +
+      ggplot2::theme_classic() +
+      ggplot2::theme(
+        panel.border = ggplot2::element_blank()
+      )
+    
+  }else{
+    
+    hist(X[NROW(X),1,], bty = "n", col = "black", prob = TRUE,
+         xlab = "", ylab = "", main = title )
+  }
+  
 }
