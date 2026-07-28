@@ -203,7 +203,7 @@ cloud_plot <- function(X, which = 1:2, gg = FALSE){
 }
 
 #histogram
-histo <- function(X, title = "Marginal"){
+histo <- function(X, title = "Marginal", gg = FALSE){
   
   if(gg){
     
@@ -216,7 +216,7 @@ histo <- function(X, title = "Marginal"){
         bins = 30,              
         fill = "black",
         color = "black",
-        aes(y = ggplot2::after_stat(density))
+        ggplot2::aes(y = ggplot2::after_stat(density))
       ) +
       ggplot2::labs(
         x = NULL,
