@@ -1,7 +1,7 @@
 source("simulate_cluster_sizes.R")
 source("plot_functions.R")
 
-### FIGURE 1
+### FIGURE 1 - simulation from fixed dataset
 n <- 2000
 set.seed(1920)
 z <- sample(1:2,n,TRUE,c(0.9,0.1))
