@@ -4,6 +4,7 @@ cluster_sizes <- function(B = 300, #simulation replicas
                           d = 1, #dimension
                           N = 150, #chains iteration
                           K = 2, #number of clusters
+                          init = NULL, #initialization vector
                           K_init = K, #number of clusters at the first iteration
                           kernel = "gaussian", #mixture kernel
                           mu0 = 0, #mean hyperparameter for the mean parameters (Gaussaian case)
@@ -44,9 +45,11 @@ cluster_sizes <- function(B = 300, #simulation replicas
       y <- sample_data(n)
       
     }
-    
-    #sample the initial value for the chain
-    init <- sample(K_init,n,TRUE)
+
+    if(is.null(init)){
+      #sample the initial value for the chain
+      init <- sample(K_init,n,TRUE)
+    }
     
     #get the configuration Markov chain for the MG
     tmp <- capture.output(MG <- nrMCmix(y,K = K, alpha = alpha,
