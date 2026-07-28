@@ -49,7 +49,7 @@ cluster_sizes <- function(B = 300, #simulation replicas
     init <- sample(K_init,n,TRUE)
     
     #get the configuration Markov chain for the MG
-    tmp <- capture.output(MG <- nrMCMC(y,K = K, alpha = alpha,
+    tmp <- capture.output(MG <- nrMCmix(y,K = K, alpha = alpha,
                                        mu0 = mu0, lambda0 = lambda0, sigma2 = sigma2,
                                        alpha0 = alpha0, beta0 = beta0,
                                        N = N-1,warm_up = 0,
@@ -65,7 +65,7 @@ cluster_sizes <- function(B = 300, #simulation replicas
     }))
     
     #do the same for the reversible one
-    tmp <- capture.output(R <- nrMCMC(y,K = K, alpha = alpha,
+    tmp <- capture.output(R <- nrMCmix(y,K = K, alpha = alpha,
                                        mu0 = mu0, lambda0 = lambda0, sigma2 = sigma2,
                                        alpha0 = alpha0, beta0 = beta0,
                                        N = N-1,warm_up = 0,
@@ -81,7 +81,7 @@ cluster_sizes <- function(B = 300, #simulation replicas
     }))
     
     #do the same for the non-reversible one
-    tmp <- capture.output(NR <- nrMCMC(y,K = K, alpha = alpha,
+    tmp <- capture.output(NR <- nrMCmix(y,K = K, alpha = alpha,
                                        mu0 = mu0, lambda0 = lambda0, sigma2 = sigma2,
                                        alpha0 = alpha0, beta0 = beta0,
                                        N = N-1,warm_up = 0,
