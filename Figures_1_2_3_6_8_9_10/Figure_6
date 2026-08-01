@@ -5,6 +5,7 @@ source("plot_functions.R")
 n <- 1000
 B <- 300
 N <- 50
+set.seed(123)
 figure6 <- sapply(c(3,10,20,50), function(K) {
   
   #initialize the output
