@@ -21,3 +21,5 @@ The folder includes the following files:
 - `Figure_9.R`: Script to reproduce Figure 9. See Section E.2 for details of the simulation setup.
 
 - `Figure_10.R`: Script to reproduce Figure 10. See Section E.3 for details of the simulation setup.
+
+- `Figures/`: Folder containing all the figures reproduced by the scripts in this repository.
