@@ -2,6 +2,7 @@ source("simulate_cluster_sizes.R")
 source("plot_functions.R")
 
 ### FIGURE 3 - overfitted mixture simulation
+set.seed(123)
 figure3_top <- cluster_sizes(B = 500,
                              N = 100,
                              n = 1000,
@@ -33,4 +34,3 @@ figure3_bottom <- cluster_sizes(B = 500,
 histo(figure3_bottom$MG)
 histo(figure3_bottom$NR)
 violin(figure3_bottom$MG[,1,],figure3_bottom$NR[,1,])
-
