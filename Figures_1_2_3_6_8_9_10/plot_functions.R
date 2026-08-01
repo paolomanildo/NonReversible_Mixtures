@@ -76,102 +76,30 @@ violin <- function(X,
                    col2 = "darkgray",
                    gg = FALSE, by = 10){
   
+  #load the package
+  require(vioplot)
   
-  if(gg){
-    
-    #get the range for the densities
-    x_lim <- range(X, Y)
-    
-    #create the grid
-    x_grid <- seq(x_lim[1], x_lim[2], length.out = 512)
-    
-    #create the time stamps
-    tt <- c(1, seq(0, NROW(X), by = 10)[-1])
-    
-    #initialize the list with the densities
-    polygon_data_list <- list()
-    
-    #loop over each time stamp
-    for (i in seq_along(tt)) {
-      
-      #get the densities
-      dens_X <- density(X[1:tt[i],], from = x_lim[1], to = x_lim[2])$y
-      dens_Y <- density(Y[1:tt[i],], from = x_lim[1], to = x_lim[2])$y
-      
-      #normalize them
-      dens_X <- dens_X / max(dens_X)
-      dens_Y <- dens_Y / max(dens_Y)
-      
-      #create a data frame with all the information
-      df_Y <- data.frame(
-        x = c(tt[i] - dens_Y * 4.5, rep(tt[i], length(x_grid))),
-        y = c(x_grid, rev(x_grid)),
-        type = "Y",
-        iteration = tt[i]  
-      )
-      
-      df_X <- data.frame(
-        x = c(tt[i] + dens_X * 4.5, rep(tt[i], length(x_grid))),
-        y = c(x_grid, rev(x_grid)),
-        type = "X",
-        iteration = tt[i]  
-      )
-      
-      #put them into the list      
-      polygon_data_list[[i]] <- rbind(df_Y, df_X)
-    }
-    
-    #concatentate the list
-    polygon_data <- do.call("rbind",polygon_data_list)
-    
-    #create the plot
-    ggplot2::ggplot(polygon_data, ggplot2::aes(x = x, y = y, fill = type)) +
-      ggplot2::geom_polygon(ggplot2::aes(group = interaction(type, iteration)), color = NA, alpha = 0.7) +
-      ggplot2::scale_fill_manual(values = c("Y" = col1, "X" = col2)) +
-      ggplot2::scale_x_continuous(name = "Iterations") +
-      ggplot2::scale_y_continuous(name = "First component proportion", breaks = tt) +
-      ggplot2::theme_minimal() +
-      ggplot2::ggtitle(title) +
-      ggplot2::theme(
-        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-        legend.position = "none"  
-      )
-    
-  }else{
-    
-    #every 10 iterations compute the empirical density
-    x_lim <- range(X,Y)
-    x_grid <- seq(x_lim[1],x_lim[2], l = 512)
-    tt <- c(1,seq(0,NROW(X), by = by)[-1])
-    X_densities <- sapply(tt,function(ttt) {
-      tmp <- density(X[seq_len(ttt),], from = x_lim[1], to = x_lim[2])$y
-      tmp/max(tmp)
-    })
-    Y_densities <- sapply(tt,function(ttt) {
-      tmp <- density(Y[seq_len(ttt),], from = x_lim[1], to = x_lim[2])$y
-      tmp/max(tmp)
-    })
-    
-    #empty plot
-    plot(c(1,NROW(X)),x_lim, xlab = "Iterations",
-         ylab = "First component proportion", xaxt = "n",
-         type = "n", main = title)
-    axis(1,tt,tt)
-    
-    #add the densities
-    for(i in seq_along(tt)){
-      
-      #Y_densities on the left
-      polygon(c(tt[i] - Y_densities[,i]*by*0.45,rep(tt[i],length(x_grid))),
-              c(x_grid,rev(x_grid)), col = col1, border = NA)
-      
-      #X_densities on the right
-      polygon(c(tt[i] + X_densities[,i]*by*0.45,rep(tt[i],length(x_grid))),
-              c(x_grid,rev(x_grid)), col = col2, border = NA)
-      
-    }
-    
-  }
+  #define the indexes to plot the results
+  ind <- c(1, seq(from = by,to = NROW(X), by = by))
+  
+  #get the reversible
+  R <- t(X[ind,])
+  colnames(R) <- ind
+  R <- as.data.frame(R)
+  
+  #get the non-reversible
+  NR <- t(Y[ind,])
+  colnames(NR) <- ind
+  NR <- as.data.frame(NR)
+  
+  #plot the non-reversible
+  vioplot::vioplot(NR, side = "left", col = col1,
+                   border = "NA",  drawRect = F, main = title,
+                   cex.axis = 1.5, cex.main = 1.5)
+  
+  #plot the reversible
+  vioplot::vioplot(R, side = "right", col = col2, border = "NA",
+                   drawRect = F, add = T)
   
 }
 
