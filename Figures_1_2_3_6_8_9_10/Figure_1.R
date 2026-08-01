@@ -15,10 +15,8 @@ figure1 <- cluster_sizes(n = 2000, N = 150, B = 100,
                          })
 
 
-spaghetti(apply(figure1$MG,c(1,3), max), title = "Marginal Gibbs", which_show = 6, gg = TRUE)
-#spaghetti(apply(figure1$R,c(1,3), max), title = "Reversible", which_show = 18, gg = TRUE)
-spaghetti(apply(figure1$NR,c(1,3), max), title = "Non-Reversible", which_show = 6, gg = TRUE)
+spaghetti(apply(figure1$MG,c(1,3), max), title = "Marginal Gibbs", which_show = 6, gg = FALSE)
+#spaghetti(apply(figure1$R,c(1,3), max), title = "Reversible", which_show = 18, gg = FALSE)
+spaghetti(apply(figure1$NR,c(1,3), max), title = "Non-Reversible", which_show = 6, gg = FALSE)
 
 violin(apply(figure1$MG,c(1,3), max),apply(figure1$NR,c(1,3), max))
-
-
