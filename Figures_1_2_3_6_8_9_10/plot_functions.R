@@ -5,7 +5,9 @@ spaghetti <- function(X,
                       title = "",
                       gg = FALSE,
                       ylim = c(0.5,1),
-                      col = adjustcolor("darkgray",0.3),
+                      ylab = "",
+                      xlab = "",
+                      col = "darkgray",
                       which_show = NULL){
   
   #ggplots?
@@ -35,8 +37,8 @@ spaghetti <- function(X,
       ggplot2::geom_line(data = df_mean, 
                          ggplot2::aes(x = chain_iter, y = prop),
                          color = "black", linewidth = 1) +  
-      ggplot2::labs(x = "Iterations",
-                    y = "First Component Proportion",
+      ggplot2::labs(x = xlab,
+                    y = ylab,
                     title = title) +
       ggplot2::theme_minimal() +
       ggplot2::theme(legend.position = "none") 
@@ -48,8 +50,8 @@ spaghetti <- function(X,
     B <- NCOL(X)
     
     #empty plot
-    plot(c(1,N),ylim,xlab = "Iterations",
-         ylab = "First component proportion",
+    plot(c(1,N),ylim,xlab = xlab,
+         ylab = ylab,
          main = title,
          type = "n")
     
@@ -59,9 +61,9 @@ spaghetti <- function(X,
     }
     #add the mean line
     if(is.null(which_show)){
-      lines(seq_len(N),apply(X,1,mean),col = "black")
+      lines(seq_len(N),apply(X,1,mean),col = "black", lwd = 1.5)
     }else{
-      lines(seq_len(N),X[,which_show],col = "black")
+      lines(seq_len(N),X[,which_show],col = "black", lwd = 1.5)
     }
   }
   
@@ -70,7 +72,7 @@ spaghetti <- function(X,
 ### violin plots of the marginal distribution evolution
 violin <- function(X,
                    Y,
-                   title = "Chains Marginal Distribution",
+                   title = "Marginal distribution of the chains",
                    ylim = c(0,1),
                    col1 = "black",
                    col2 = "darkgray",
@@ -104,7 +106,7 @@ violin <- function(X,
 }
 
 #scatter plot
-cloud_plot <- function(X, which = 1:2, gg = FALSE){
+cloud_plot <- function(X, which = 1:2, gg = FALSE, title = "Marginal Gibbs"){
   
   if(gg){
     
@@ -118,20 +120,21 @@ cloud_plot <- function(X, which = 1:2, gg = FALSE){
       ggplot2::geom_point(size = 0.5) +
       ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
       ggplot2::labs(x = NULL, y = NULL) +
-      ggplot2::theme_classic()
+      ggplot2::theme_classic() + 
+      ggplot2::labs(title = title)
     
   }else{
     
     #take the tail
     plot(t(X[NROW(X),which,]), xlim = c(0,1), ylim = c(0,1),
-         xlab = "", ylab = "", pch = 16, cex = .5)
+         xlab = "", ylab = "", pch = 16, cex = .5, main = title)
     
   }
   
 }
 
 #histogram
-histo <- function(X, title = "Marginal", gg = FALSE){
+histo <- function(X, title = "Marginal Gibbs", gg = FALSE){
   
   if(gg){
     
