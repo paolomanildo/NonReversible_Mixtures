@@ -1,5 +1,6 @@
 #load the data
 load("long_run.RData")
+y <- read.csv("COMBO17.csv")$Mcz
 
 {
   par(mfrow = c(1,2))
