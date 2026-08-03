@@ -7,7 +7,7 @@ spaghetti <- function(X,
                       ylim = c(0.5,1),
                       ylab = "",
                       xlab = "",
-                      col = "darkgray",
+                      col = gray(0.6),
                       which_show = NULL){
   
   #ggplots?
@@ -53,17 +53,22 @@ spaghetti <- function(X,
     plot(c(1,N),ylim,xlab = xlab,
          ylab = ylab,
          main = title,
-         type = "n")
+         type = "n",
+         cex.lab = 1.5,
+         cex.axis = 1.5,
+         cex.main = 1.5)
     
     #add the lines
     for(b in seq_len(B)){
-      lines(seq_len(N),X[,b], col = col)
+      lines(seq_len(N),X[,b], col = col, lwd = 3)
     }
     #add the mean line
     if(is.null(which_show)){
-      lines(seq_len(N),apply(X,1,mean),col = "black", lwd = 1.5)
+      lines(seq_len(N),apply(X,1,mean),col = "black", lwd = 3)
+      lines(seq_len(N),apply(X,1,mean),col = "black", lwd = 3)
     }else{
-      lines(seq_len(N),X[,which_show],col = "black", lwd = 1.5)
+      lines(seq_len(N),X[,which_show],col = "black", lwd = 3)
+      lines(seq_len(N),X[,which_show],col = "black", lwd = 3)
     }
   }
   
@@ -127,7 +132,8 @@ cloud_plot <- function(X, which = 1:2, gg = FALSE, title = "Marginal Gibbs"){
     
     #take the tail
     plot(t(X[NROW(X),which,]), xlim = c(0,1), ylim = c(0,1),
-         xlab = "", ylab = "", pch = 16, cex = .5, main = title)
+         xlab = "", ylab = "", pch = 19, cex.axis = 1.5,
+         main = title, cex.main = 1.5)
     
   }
   
@@ -162,7 +168,7 @@ histo <- function(X, title = "Marginal Gibbs", gg = FALSE){
   }else{
     
     hist(X[NROW(X),1,], bty = "n", col = "black", prob = TRUE,
-         xlab = "", ylab = "", main = title )
+         xlab = "", ylab = "", main = title , cex.main = 1.5, cex.axis = 1.5)
   }
   
 }
