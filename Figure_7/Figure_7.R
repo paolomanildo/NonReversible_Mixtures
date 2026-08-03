@@ -1,5 +1,5 @@
 #get the results
-load("~/Scrivania/hactar/refresh/results.RData")
+load("results.RData")
 
 #define the grid for the refreshment rate
 xi_grid <- 10^seq(log10(0.01), log10(1000), length.out = 100)
