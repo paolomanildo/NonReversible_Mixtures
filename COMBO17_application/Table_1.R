@@ -1,3 +1,4 @@
+#load the results
 load("results1.RData")
 
 #define the empirical TV distance
@@ -68,7 +69,9 @@ T2C <- apply(TVs,2,function(x) {
 #plot
 matplot(TVs, type = "l", lty = 1)
 abline(v = T2C, col = 1:4)
-
+legend("topright",lty = 1, col = 1:4, legend = c("MG","NR","NUSAMS(0,5,1)","NUSAMS(0,5,1) + NR"),
+       bg = "transparent", bty = "n", cex = .8)
+                                       
 #get the number of predictive calls to convergence
 n_preds_to_conv <- t(sapply(1:100, function(i){
   c(sum(res[[i]][4*1000 + seq_len(T2C[1])]),
