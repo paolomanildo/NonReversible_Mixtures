@@ -1306,7 +1306,7 @@ void random_scan(Model& model,
   for( unsigned int tt = 0; tt < thin; tt++ ){
     
     // perturb the direction randomly
-    perturb_momentum(dir,theta,K);
+    // perturb_momentum(dir,theta,K);
     
     // set the direction
     if(t == 0){
@@ -1401,7 +1401,7 @@ void random_scan(Model& model,
     }
     
     // perturb the direction randomly
-    perturb_momentum(dir,theta,K);
+    // perturb_momentum(dir,theta,K);
     
     // has the direction overall changed?
     if(vel != dir[idx_dir]){
