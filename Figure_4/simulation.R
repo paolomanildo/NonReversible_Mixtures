@@ -200,3 +200,7 @@ res <- foreach(
 
 #stop the clusters
 stopCluster(cl)
+
+#save the results
+save(res, file = "/home/manildo/nrMCmix/results01.RData")
+
