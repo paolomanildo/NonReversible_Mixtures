@@ -22,7 +22,7 @@ figure6 <- sapply(c(3,10,20,50), function(K) {
     
     #get the configuration Markov chain for the classic non-reversible algorithm
     tmp <- capture.output(PNR <- nrMCmix(numeric(n),K = K, alpha = alpha,
-                                         N = N-1,warm_up = 0, xi = 0.5 / K,
+                                         N = N-1,warm_up = 0, xi = 2 / K / (K-1),
                                          kernel = "partition", init = init,
                                          save_configurations = TRUE))
     PNR_lbls <- get_labels_draws(PNR) + 1
@@ -35,7 +35,7 @@ figure6 <- sapply(c(3,10,20,50), function(K) {
     
     #do the same for its variant
     tmp <- capture.output(QNR <- nrMCmix(numeric(n),K = K, alpha = alpha,
-                                         N = N-1,warm_up = 0, s = 1, xi = 0.5 / K,
+                                         N = N-1,warm_up = 0, s = 1, 
                                          kernel = "partition", init = init,
                                          save_configurations = TRUE))
     QNR_lbls <- get_labels_draws(QNR) + 1
