@@ -272,4 +272,4 @@ results <- function(indexes = seq_len(100),
 }
 
 #execute the code
-results(1:100, "results1.RData")
+results(1:500, "results.RData")
