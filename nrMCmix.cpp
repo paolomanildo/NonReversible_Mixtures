@@ -14433,6 +14433,440 @@ arma::vec priorK(const double& alpha = 1.0,
   return arma::exp(log_P.row(n-1).t());
 }
 
+// [[Rcpp::export]]
+Rcpp::List get_latent_process(const arma::uvec& c,
+                              const arma::vec& y,
+                              const unsigned int& K = 0L,
+                              const double& alpha = 1.0,
+                              const double& delta = 0.0,
+                              const double& sigma2 = 0.0,
+                              const double& mu0 = 0.0,
+                              const double& lambda0 = 0.01,
+                              const double& alpha0 = 0.01,
+                              const double& beta0 = 0.01,
+                              const Rcpp::RObject& x_grid = R_NilValue,
+                              const unsigned int& n_grid = 512L){
+  
+  // initialize the output list
+  Rcpp::List out;
+  
+  // get the grid for density estimation
+  arma::vec xx_grid;
+  
+  // initialize the density response vector
+  arma::vec y_grid;
+  
+  if(x_grid.isNULL()){
+    
+    // get the data range
+    double y_min = arma::min(y);
+    double y_max = arma::max(y);
+    double y_range = y_max - y_min;
+    y_min -= 0.05 * y_range;
+    y_max += 0.05 * y_range;
+    double y_step = y_range * 1.1 / (n_grid-1);
+    
+    // create the grid
+    xx_grid = arma::zeros<arma::vec>(n_grid);
+    y_grid = arma::zeros<arma::vec>(n_grid);
+    xx_grid(0) = y_min;
+    for(unsigned int i = 1; i < n_grid; i++){
+      xx_grid(i) = xx_grid(i-1) + y_step;
+    }
+    
+  }else{
+    
+    // get the user defined grid
+    xx_grid = Rcpp::as<arma::vec>(x_grid);
+    
+    // create the response
+    y_grid = arma::zeros<arma::vec>(xx_grid.n_elem);
+    
+  }
+  
+  // known variance?
+  if(sigma2 == 0.0){
+    
+    // distinguish the two cases
+    if(K == 0){
+      
+      // infinite mixture
+      
+      // initialize the sufficient statistics
+      std::vector<double> ns;
+      ns.reserve(y.n_elem);
+      
+      std::vector<double> sums_y;
+      sums_y.reserve(y.n_elem);
+      
+      std::vector<double> sums_y2;
+      sums_y2.reserve(y.n_elem);
+      
+      // loop along the configuration vector
+      unsigned int k = 0;
+      double y_i = 0.0;
+      unsigned int K_atm = 0;
+      std::unordered_map<unsigned int, unsigned int> lbl2atm;
+      for(unsigned int i = 0; i < y.n_elem; i++){
+        
+        // check that the current labels is not already present in the dictionary
+        if(!lbl2atm.count(c(i))){
+          
+          // if the current label is not present, append it to the dictionary
+          lbl2atm[c(i)] = K_atm;
+          
+          // increase the number of active components
+          K_atm++;
+          
+          // append the new values to the sufficient statistics vectors
+          ns.push_back(0.0);
+          sums_y.push_back(0.0);
+          sums_y2.push_back(0.0);
+          
+        }
+        
+        // get the current new label
+        k = lbl2atm[c(i)];
+        
+        // get the datum
+        y_i = y(i);
+        
+        // update the sufficient statistics
+        ns[k]++;
+        sums_y[k] += y_i;
+        sums_y2[k] += y_i * y_i;
+        
+      }
+      
+      // compute the atoms
+      arma::vec w(K_atm);
+      arma::vec sigma2s(K_atm);
+      arma::vec mus(K_atm);
+      double lambda,mu;
+      for(unsigned int k = 0; k < K_atm; k++){
+        lambda = lambda0 + ns[k];
+        mu = (lambda0*mu0 + sums_y[k] ) / lambda;
+        w(k) = (ns[k] - delta) / (alpha + y.n_elem);
+        sigma2s(k) = 1.0 / R::rgamma(alpha0 + 0.5*ns[k], 1.0 / (beta0 + 0.5 * (mu0 * mu0 * lambda0 + sums_y2[k] - lambda * mu * mu)));
+        mus(k) = R::rnorm(mu,std::sqrt(sigma2s(k)/lambda));
+      }
+      
+      // evaluate the density in the specified points
+      arma::vec tmp(K_atm + 1);
+      
+      // save some recurrent quantities
+      double prior_term1 =
+        std::lgamma(alpha0 + 0.5)
+        - std::lgamma(alpha0)
+        - 0.5 * std::log(
+            2.0 * arma::datum::pi * beta0 *
+            (1.0 + 1.0 / lambda0)
+        );
+      
+      double prior_term2 =
+        1.0 /
+          (2.0 * beta0 * (1.0 + 1.0 / lambda0));
+      
+      double const_term = -0.5 * std::log(2*arma::datum::pi);
+      
+      for(unsigned int i = 0; i < y_grid.n_elem; i++){
+        
+        // get the value
+        y_i = xx_grid(i);
+        
+        // compute the log contributes from each atom
+        for(unsigned int k = 0; k < K_atm; k++){
+          tmp(k) = const_term + std::log(w(k))-
+            0.5 * std::log(sigma2s(k)) - 
+            0.5 * (y_i - mus(k)) * (y_i - mus(k)) / sigma2s(k);
+        }
+        
+        // add the baseline contribution
+        tmp(K_atm) = std::log( alpha + K_atm * delta ) - std::log(alpha + y.n_elem) +
+          prior_term1 - (alpha0 + 0.5) * std::log(1.0 + prior_term2 * (y_i - mu0) * (y_i - mu0));
+        
+        // normalize the contributes
+        y_grid(i) = std::exp(log_sum_exp(tmp));
+        
+      }
+      
+      // return the quantities of interest
+      out["w"] = w;
+      out["mu"] = mus;
+      out["sigma2"] = sigma2s;
+      out["x"] = xx_grid;
+      out["y"] = y_grid;
+      
+    }else{
+      
+      // finite mixture
+      
+      // compute the sufficient statistics
+      arma::vec ns = arma::zeros<arma::vec>(K);
+      arma::vec sums_y = arma::zeros<arma::vec>(K);
+      arma::vec sums_y2 = arma::zeros<arma::vec>(K);
+      
+      unsigned int k = 0;
+      double y_i = 0.0;
+      for(unsigned int i = 0; i < y.n_elem; i++){
+        
+        // get the current label
+        k = c(i);
+        if(k >= K){
+          Rcpp::stop("Labels greater than the number of cluster specified!");
+        }
+        
+        // get the unit
+        y_i = y(i);
+        
+        // update the sufficient statistcs
+        ns(k)++;
+        sums_y(k) += y_i;
+        sums_y2(k) += y_i * y_i;
+        
+      }
+      
+      // compute the atoms
+      arma::vec w = rdirichlet(alpha + ns);
+      arma::vec sigma2s(K);
+      arma::vec mus(K);
+      double lambda,mu;
+      for(unsigned int k = 0; k < K; k++){
+        lambda = lambda0 + ns(k);
+        mu = (lambda0*mu0 + sums_y(k) ) / lambda;
+        sigma2s(k) = 1.0 / R::rgamma(alpha0 + 0.5*ns(k), 1.0 / (beta0 + 0.5 * (mu0 * mu0 * lambda0 + sums_y2(k) - lambda * mu * mu)));
+        mus(k) = R::rnorm(mu,std::sqrt(sigma2s(k)/lambda));
+      }
+      
+      // evaluate the density in the specified points
+      arma::vec tmp(K);
+      double const_term = -0.5 * std::log(2*arma::datum::pi) - std::log(alpha + y.n_elem);
+      for(unsigned int i = 0; i < y_grid.n_elem; i++){
+        
+        // get the value
+        y_i = xx_grid(i);
+        
+        // compute the log contributes from each atom
+        for(unsigned int k = 0; k < K; k++){
+          tmp(k) = const_term + std::log(alpha + ns(k))-
+            0.5 * std::log(sigma2s(k)) - 
+            0.5 * (y_i - mus(k)) * (y_i - mus(k)) / sigma2s(k);
+        }
+        
+        // normalize the contributes
+        y_grid(i) = std::exp(log_sum_exp(tmp));
+        
+      }
+      
+      // return the quantities of interest
+      out["w"] = w;
+      out["mu"] = mus;
+      out["sigma2"] = sigma2s;
+      out["x"] = xx_grid;
+      out["y"] = y_grid;
+    }
+    
+  }else{
+    
+    if(K == 0){
+      // infinite mixture
+      
+      // initialize the sufficient statistics
+      std::vector<double> ns;
+      ns.reserve(y.n_elem);
+      
+      std::vector<double> sums_y;
+      sums_y.reserve(y.n_elem);
+      
+      // loop along the configuration vector
+      unsigned int k = 0;
+      double y_i = 0.0;
+      unsigned int K_atm = 0;
+      std::unordered_map<unsigned int, unsigned int> lbl2atm;
+      for(unsigned int i = 0; i < y.n_elem; i++){
+        
+        // check that the current labels is not already present in the dictionary
+        if(!lbl2atm.count(c(i))){
+          
+          // if the current label is not present, append it to the dictionary
+          lbl2atm[c(i)] = K_atm;
+          
+          // increase the number of active components
+          K_atm++;
+          
+          // append the new values to the sufficient statistics vectors
+          ns.push_back(0.0);
+          sums_y.push_back(0.0);
+        }
+        
+        // get the current new label
+        k = lbl2atm[c(i)];
+        
+        // get the datum
+        y_i = y(i);
+        
+        // update the sufficient statistics
+        ns[k]++;
+        sums_y[k] += y_i;
+        
+      }
+      
+      // compute the atoms
+      arma::vec w(K_atm);
+      arma::vec mus(K_atm);
+      double lambda,mu;
+      for(unsigned int k = 0; k < K_atm; k++){
+        lambda = lambda0 + ns[k];
+        mu = (lambda0*mu0 + sums_y[k] ) / lambda;
+        w(k) = (ns[k] - delta) / (alpha + y.n_elem);
+        mus(k) = R::rnorm(mu,std::sqrt(sigma2/lambda));
+      }
+      
+      // evaluate the density in the specified points
+      arma::vec tmp(K_atm + 1);
+      
+      // save some recurrent quantities
+      double const_term = -0.5 * std::log(2*arma::datum::pi*sigma2);
+      double prior_term1 = -0.5 * std::log(1.0 + 1.0/lambda0) + const_term;
+      
+      for(unsigned int i = 0; i < y_grid.n_elem; i++){
+        
+        // get the value
+        y_i = xx_grid(i);
+        
+        // compute the log contributes from each atom
+        for(unsigned int k = 0; k < K_atm; k++){
+          tmp(k) = const_term + std::log(w(k)) -
+            0.5 * (y_i - mus(k)) * (y_i - mus(k)) / sigma2;
+        }
+        
+        // add the baseline contribution
+        tmp(K_atm) = std::log( alpha + K_atm * delta ) - std::log(alpha + y.n_elem) +
+          prior_term1 - 0.5 * (y_i - mu0) * (y_i - mu0) / sigma2 / (1.0 + 1.0/lambda0);
+        
+        // normalize the contributes
+        y_grid(i) = std::exp(log_sum_exp(tmp));
+        
+      }
+      
+      // return the quantities of interest
+      out["w"] = w;
+      out["mu"] = mus;
+      out["x"] = xx_grid;
+      out["y"] = y_grid;
+      
+    }else{
+      
+      // finite mixture
+      
+      // compute the sufficient statistics
+      arma::vec ns = arma::zeros<arma::vec>(K);
+      arma::vec sums_y = arma::zeros<arma::vec>(K);
+      
+      unsigned int k = 0;
+      double y_i = 0.0;
+      for(unsigned int i = 0; i < y.n_elem; i++){
+        
+        // get the current label
+        k = c(i);
+        if(k >= K){
+          Rcpp::stop("Labels greater than the number of cluster specified!");
+        }
+        
+        // get the unit
+        y_i = y(i);
+        
+        // update the sufficient statistcs
+        ns(k)++;
+        sums_y(k) += y_i;
+        
+      }
+      
+      // compute the atoms
+      arma::vec w = rdirichlet(alpha + ns);
+      arma::vec sigma2s(K);
+      arma::vec mus(K);
+      double lambda,mu;
+      for(unsigned int k = 0; k < K; k++){
+        lambda = lambda0 + ns(k);
+        mu = (lambda0*mu0 + sums_y(k) ) / lambda;
+        mus(k) = R::rnorm(mu,std::sqrt(sigma2/lambda));
+      }
+      
+      // evaluate the density in the specified points
+      arma::vec tmp(K);
+      double const_term = -0.5 * std::log(2*arma::datum::pi*sigma2) - std::log(alpha + y.n_elem);
+      for(unsigned int i = 0; i < y_grid.n_elem; i++){
+        
+        // get the value
+        y_i = xx_grid(i);
+        
+        // compute the log contributes from each atom
+        for(unsigned int k = 0; k < K; k++){
+          tmp(k) = const_term + std::log(alpha + ns(k))-
+            0.5 * (y_i - mus(k)) * (y_i - mus(k)) / sigma2;
+        }
+        
+        // normalize the contributes
+        y_grid(i) = std::exp(log_sum_exp(tmp));
+        
+      }
+      
+      // return the quantities of interest
+      out["w"] = w;
+      out["mu"] = mus;
+      out["x"] = xx_grid;
+      out["y"] = y_grid;
+    }
+    
+  }
+  // return the output list
+  return out;
+  
+}
+
+
+// [[Rcpp::export]]
+arma::mat compute_similarity_matrix(const arma::umat& c){
+  
+  // get the number of units
+  unsigned int n = c.n_cols;
+  
+  // get the number of iterations
+  unsigned int N = c.n_rows;
+  
+  // initialize the similarity matrix
+  arma::mat out = arma::zeros<arma::mat>(n,n);
+  
+  // add the counts
+  for(unsigned int iter = 0; iter < N; iter++){
+    
+    // loop over each pair
+    for(unsigned int i = 0; i < n; i++){
+      for(unsigned int j = 0; j < i; j++){
+        
+        // check the occurrence
+        if(c(iter,i) == c(iter,j)){
+          
+          out(i,j)++;
+          out(j,i)++;
+          
+        }
+          
+      }
+    }
+    
+  }
+  
+  // normalize the counts
+  out /= N;
+  
+  // return the similarity matrix
+  return out;
+  
+}
+
+
 /*** R
 
 get_labels_draws <- function(sampler, chain_id = 1){
