@@ -8,7 +8,7 @@ The repository is organized as follows:
 
 - `nrMCmix.cpp`: A standalone file containing the C++ and R code of the package. It can be compiled and loaded directly in R using `Rcpp::sourceCpp("nrMCmix.cpp")`.
 
-- `COMBO17/`: Code to reproduce the results of Section 6, *Application to Astronomical Data*, using the COMBO17 dataset.
+- `COMBO17/`: Code to reproduce the results of Section 6, including Figure Table 1 and Figure 11 in Section L, *Application to Astronomical Data*, using the COMBO17 dataset.
 
 - `Figure_10/`: Code to reproduce Figure 10. See Section K of the paper for details of the simulation setup.
 
