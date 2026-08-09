@@ -1,6 +1,6 @@
 # NonReversible_Mixtures
 
-This repository contains the R code required to reproduce the experiments presented in the paper *A Fast Non-Reversible Sampler for Bayesian Mixture Models* by Ascolani et al. (2025).
+This repository contains the R code required to reproduce the experiments presented in the paper *A Fast Non-Reversible Sampler for Bayesian Mixture Models* by Ascolani et al. (2026).
 
 The repository is organized as follows:
 
