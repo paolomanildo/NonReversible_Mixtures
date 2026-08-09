@@ -10,7 +10,7 @@ figure9_top <- cluster_sizes(n = 1000, N = 100, B = 300,
                               sample_from_model = TRUE)
 
 cloud_plot(figure9_top$MG, gg = FALSE)
-#cloud_plot(figure10_top$R, gg = FALSE)
+#cloud_plot(figure9_top$R, gg = FALSE)
 cloud_plot(figure9_top$NR, gg = FALSE, title = "Non-reversible")
 violin(figure9_top$MG[,1,],figure9_top$NR[,1,])
 
@@ -21,6 +21,6 @@ figure9_bottom <- cluster_sizes(n = 1000, N = 100, B = 300,
                                  sample_from_model = TRUE)
 
 cloud_plot(figure9_bottom$MG, gg = FALSE)
-#cloud_plot(figure10_top$R, gg = TRUE)
+#cloud_plot(figure9_top$R, gg = TRUE)
 cloud_plot(figure9_bottom$NR, gg = FALSE, title = "Non-reversible")
 violin(figure9_bottom$MG[,1,],figure9_bottom$NR[,1,])
