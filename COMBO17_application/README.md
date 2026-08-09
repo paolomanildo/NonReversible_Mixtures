@@ -10,6 +10,6 @@ The folder includes the following files:
 
 - `simulations.R`: Code for the simulation study described in Section 7.
 
-- `Figure_5.R`: Script to reproduce Figure 5. See Section 7 of the paper for details of the analysis and simulation setup.
+- `Figure_11.R`: Script to reproduce Figure 11. See Section L of the supplement for details of the analysis and simulation setup.
 
 - `Table_1.R`: Script to reproduce Table 1. See Section 7 of the paper for details of the analysis and simulation setup.
