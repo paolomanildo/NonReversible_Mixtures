@@ -1,12 +1,15 @@
 #ANALYSIS
-load("results01.RData")
+load("resultsDP1.RData")
 
+#create the configuration grid
 n_grid = round(10^seq(3, 4, length.out = 5))
 d_grid = c(1,3,5)
 grea <- as.matrix(expand.grid(n_grid,d_grid))
 N <- (dim(res[[1]])[1] - 8) / 8
 
 #get the quantities of interest
+
+#entropiy traces
 entropies <- sapply(res, function(x) {
   sapply(seq_len(NCOL(x)),function(i){
     cbind(x[seq_len(N),i],
@@ -16,6 +19,7 @@ entropies <- sapply(res, function(x) {
   }, simplify = "array")
 }, simplify = "array")
 
+#number of predictive evaluations
 n_pred_calls <- sapply(res, function(x) {
   sapply(seq_len(NCOL(x)),function(i){
     cbind(x[N + seq_len(N),i],
@@ -32,6 +36,7 @@ ESS <- sapply(res, function(x) {
   }, simplify = "array"))
 }, simplify = "array")
 
+#scaled ESS
 sESS <- sapply(res, function(x) {
   t(sapply(seq_len(NCOL(x)),function(i){
     x[8*N + 1:4,i] / x[8*N  + 5:8,i] 
@@ -40,7 +45,7 @@ sESS <- sapply(res, function(x) {
 
 #simulate from the real prior
 prior_draws <- sapply(n_grid,rprior,prior_only = TRUE,
-                      N = 1e4, alpha = .1,
+                      N = 1e4, alpha = 1,
                       simplify = "array")
 
 #compute the TV distances
@@ -50,25 +55,22 @@ x_lim <- range(prior_draws,entropies, na.rm = TRUE)
 x_lim <- x_lim + c(-1,1) * 0.001 * diff(x_lim)
 
 Y_vals <- apply(prior_draws,3,function(y){
-  p0 <- mean(y == 0)
-  c(p0,(1-p0) * density(y[y != 0],from = x_lim[1], to = x_lim[2], n = 512)$y)
+  density(y,from = x_lim[1], to = x_lim[2], n = 512)$y
 })
 
 TV <- function(x,y){
   
   #compute the two densities
   x_grid <- seq(x_lim[1],x_lim[2],l = 512)
-  p0 <- mean(x == 0)
-  X_val <- (1-p0) * density(x[x != 0],from = x_lim[1], to = x_lim[2], n = 512)$y
-
+  X_val <- density(x,from = x_lim[1], to = x_lim[2], n = 512)$y
+  
   #compute the TV distance with the trapezoidal rule:
   
-  #save the absolute differences for the continouos part
-  abs_diff <- abs(X_val - y[-1])
+  #save the absolute differences
+  abs_diff <- abs(X_val - y)
   
   #return the integral using the trapezoidal rule
-  0.5 * ( abs(p0 - y[1]) + 
-            sum( diff(x_grid) * (head(abs_diff, -1) + tail(abs_diff, -1)) / 2 ))
+  0.5 * sum( diff(x_grid) * (head(abs_diff, -1) + tail(abs_diff, -1)) / 2 )
   
 }
 
@@ -93,6 +95,7 @@ for(cc in seq_along(TVs)){
   
 }
 
+#convergence plots
 {
   X11()
   par(mfrow = c(5,3), mar = c(.1,2.1,.1,.1))
@@ -158,7 +161,7 @@ p1 <- ggplot(
     labeller = label_bquote(d == .(d))
   ) +
   labs(
-    y = "N° predictives to converge\n(log scale)",
+    y = "N° predictives to converge \n(log scale)",
     color = NULL,
     shape = NULL
   ) +
@@ -203,7 +206,7 @@ p2 <- ggplot(
   ) +
   labs(
     x = "Sample size (log scale)",
-    y = "ESS (log scale)",
+    y = "ESS \n(log scale)",
     color = NULL,
     shape = NULL
   ) +
@@ -246,7 +249,7 @@ p3 <- ggplot(
   ) +
   labs(
     x = "Sample size (log scale)",
-    y = "ESS per predictive\n(log scale)",
+    y = "ESS per predictive \n(log scale)",
     color = NULL,
     shape = NULL
   ) +
@@ -274,3 +277,5 @@ p1 / p3 +
   plot_layout(
     heights = c(1, 1.15)
   )
+
+
