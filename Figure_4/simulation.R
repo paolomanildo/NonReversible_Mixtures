@@ -1,3 +1,5 @@
+### DIRICHLET PROCESS PRIOR-POSTERIOR CHECK
+
 #function for prior checking the spherical Gaussian DP
 rprior <- function(n = 1000L, d = 1L, alpha = 1, delta = 0,
                    sigma2 = 1, mu0 = rep(0,d), lambda0 = 0.1,
@@ -163,7 +165,7 @@ iteration2 <- function(n_grid = round(10^seq(3, 4, length.out = 5)),
 }
 
 #initialize the results
-B <- 100
+B <- 500
 
 library(doParallel)
 library(foreach)
@@ -202,5 +204,4 @@ res <- foreach(
 stopCluster(cl)
 
 #save the results
-save(res, file = "/home/manildo/nrMCmix/results01.RData")
-
+save(res, file = "results1.RData")
