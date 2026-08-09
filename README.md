@@ -21,5 +21,3 @@ The repository is organized as follows:
 # References
 
 Ascolani, F., Manildo, P. & Zanella, G. (2026). *A fast non-reversible sampler for Bayesian mixture models*. arXiv. https://arxiv.org/abs/2510.03226
-
-Okabe, T., Kawata, M., Okamoto, Y., & Mikami, M. (2001). Replica-exchange Monte Carlo method for the isobaric-isothermal ensemble. *Chemical Physics Letters, 335*(5-6), 435-439.
