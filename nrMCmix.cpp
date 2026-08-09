@@ -14376,7 +14376,7 @@ Rcpp::List generate_data(const unsigned int& n = 100L,
     
   }else{
     // partition
-    for(unsigned int k = ns.n_elem-1; k > 1; k--){
+    for(unsigned int k = ns.n_elem-1; k > 0; k--){
       ns(k) -= ns(k-1);
     }
     out["ns"] = ns;
