@@ -6,17 +6,99 @@ load("results1final.RData")
 load("results4final.RData")
 load("schedules.RData")
 
+#function for density estimation
+plot_fit <- function(y, n_grid = 33, n_bins = 33){
+  
+  #load the packages
+  require(ggplot2)
+  require(nrMCmix)
+  
+  #get the draws
+  tmp <- nrMCmix(y, K = 3, sigma2 = 1,
+                          save_configurations = TRUE)
+  lbls <- get_labels_draws(tmp)
+  
+  #get the fitted densities
+  tmp <- apply(lbls,1,get_latent_process, y = y, K = 3,
+               sigma2 = 1.0, n_grid = n_grid)
+  x_grid <- tmp[[1]]$x
+  y_vals <- t(sapply(tmp,function(x) x$y))
+  
+  #construct the data frame with the bounds
+  df <- data.frame(
+    x = x_grid,
+    post_mean = apply(y_vals, 2, mean, na.rm = TRUE),
+    lwr = apply(y_vals, 2, quantile, probs = 0.1, na.rm = TRUE),
+    upr = apply(y_vals, 2, quantile, probs = 0.9, na.rm = TRUE)
+  )
+  
+  color <- adjustcolor("black",0.5)
+  
+  #create the plot
+  G <- ggplot2::ggplot() +
+    
+    # Observed-data histogram
+    ggplot2::geom_histogram(
+      data = base::data.frame(value = y),
+      ggplot2::aes(
+        x = value,
+        y = ggplot2::after_stat(density)
+      ),
+      bins = n_bins,
+      fill = "gray",
+      color = "black",
+      alpha = 0.5
+    ) +
+    
+    # Posterior mean density
+    ggplot2::geom_line(
+      data = df,
+      ggplot2::aes(
+        x = x,
+        y = post_mean
+      ),
+      color = color,
+      linewidth = 1
+    ) +
+    
+    # 10%-90% posterior band
+    ggplot2::geom_ribbon(
+      data = df,
+      ggplot2::aes(
+        x = x,
+        ymin = lwr,
+        ymax = upr
+      ),
+      fill = color,
+      alpha = 0.3
+    ) +
+    
+    # Labels
+    ggplot2::labs(
+      title = "",
+      x = "y",
+      y = "density"
+    ) +
+    
+    # Theme
+    ggplot2::theme_minimal() +
+    
+    ggplot2::theme(
+      legend.position = "right",
+      legend.title = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = 0.5),
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank()
+    )
+  
+  #return it
+  G
+}
+
 ###
 {
   # p1
-  p1 <- plot(
-    NRMCMC::nrmix(
-      y1, K = 3, alpha = c(1, 1, 1),
-      sigma2 = 1, n_chains = 1
-    )
-  ) +
-    ggplot2::theme(legend.position = "none")
-  
+  p1 <- plot_fit(y1)
   
   # p2
   x_grid <- seq_len(2000)
@@ -217,14 +299,7 @@ load("schedules.RData")
   
   
   # p4
-  p4 <- plot(
-    NRMCMC::nrmix(
-      y4, K = 3, alpha = c(1, 1, 1),
-      sigma2 = 1, n_chains = 1
-    )
-  ) +
-    ggplot2::theme(legend.position = "none")
-  
+  p4 <- plot_fit(y4)
   
   # p5
   p5 <- ggplot(
