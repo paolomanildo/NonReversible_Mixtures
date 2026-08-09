@@ -18,7 +18,7 @@ cluster_sizes <- function(B = 300, #simulation replicas
 ){
   
   #load the package
-  tryCatch(require(nrMCmix), error = function(x) message('Cannot found package "nrMCmix", try load it by Rcpp::sourceCpp("nrMCmix.cpp")'))
+  tryCatch(library(nrMCmix), error = function(x) Rcpp::sourceCpp("nrMCmix.cpp"))
   
   #initialize the output
   MG_cluster_sizes <- R_cluster_sizes <- NR_cluster_sizes <- array(NA, dim = c(N,K,B))
