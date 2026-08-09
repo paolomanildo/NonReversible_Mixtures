@@ -1,5 +1,5 @@
 #load the results
-load("results1.RData")
+load("results.RData")
 
 #define the empirical TV distance
 TV <- function(x,y,discrete = FALSE, n_grid = 512){
@@ -73,7 +73,7 @@ legend("topright",lty = 1, col = 1:4, legend = c("MG","NR","NUSAMS(0,5,1)","NUSA
        bg = "transparent", bty = "n", cex = .8)
                                        
 #get the number of predictive calls to convergence
-n_preds_to_conv <- t(sapply(1:100, function(i){
+n_preds_to_conv <- t(sapply(1:500, function(i){
   c(sum(res[[i]][4*1000 + seq_len(T2C[1])]),
     sum(res[[i]][5*1000 + seq_len(T2C[2])]),
     sum(res[[i]][6*1000 + seq_len(T2C[3])]),
