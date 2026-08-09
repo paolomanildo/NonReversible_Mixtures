@@ -12,7 +12,7 @@ The repository is organized as follows:
 
 - `Figure_10/`: Code to reproduce Figure 10. See Section K of the paper for details of the simulation setup.
 
-- `Figure_4/`: Code to reproduce Figure 4. See Section 6.3 of the paper for details of the simulation setup.
+- `Figure_4/`: Code to reproduce Figure 4. See Section 5.3 of the paper for details of the simulation setup.
 
 - `Figure_5/`: Code to reproduce Figure 5. See Section E.1 of the paper for details of the simulation setup.
 
