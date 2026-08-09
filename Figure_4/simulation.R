@@ -10,7 +10,7 @@ rprior <- function(n = 1000L, d = 1L, alpha = 1, delta = 0,
                    prior_only = FALSE, seed = NULL){
   
   #load the package
-  require(nrMCmix)
+  tryCatch(library(nrMCmix), error = function(x) Rcpp::sourceCpp("nrMCmix.cpp"))
   
   #set the seed and the common starting value
   set.seed(seed)
